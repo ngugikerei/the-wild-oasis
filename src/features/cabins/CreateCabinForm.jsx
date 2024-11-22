@@ -5,8 +5,8 @@ import Form from "../../ui/Form";
 import Button from "../../ui/Button";
 import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
-import { useForm } from "react-hook-form";
-import create from "prompt-sync";
+import { get, useForm } from "react-hook-form";
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createCabin } from "../../services/apiCabins";
 import toast from "react-hot-toast";
@@ -52,9 +52,6 @@ function CreateCabinForm({ setShowCabinForm }) {
 
   const { register, handleSubmit, getValues, formState } = useForm();
 
-  const { errors } = formState;
-  console.log(errors);
-
   const { isLoading: isCreating, mutate } = useMutation({
     mutationFn: createCabin,
     onSuccess: () => {
@@ -71,9 +68,11 @@ function CreateCabinForm({ setShowCabinForm }) {
     mutate(data);
     setShowCabinForm((show) => !show);
   }
+  const { errors } = formState;
+  console.log(errors);
 
   function onError(errors) {
-    console.error(errors);
+    //console.log(errors);
   }
 
   return (
@@ -85,6 +84,8 @@ function CreateCabinForm({ setShowCabinForm }) {
           id="name"
           {...register("name", { required: "This field is required" })}
         />
+
+        {errors?.name && <Error>{errors.name.message}</Error>}
       </FormRow>
 
       <FormRow>
@@ -97,6 +98,8 @@ function CreateCabinForm({ setShowCabinForm }) {
             min: { value: 1, message: "Minimum capacity is 1" },
           })}
         />
+
+        {errors?.maxCapacity && <Error>{errors.maxCapacity.message}</Error>}
       </FormRow>
 
       <FormRow>
@@ -106,6 +109,7 @@ function CreateCabinForm({ setShowCabinForm }) {
           id="regularPrice"
           {...register("regularPrice", { required: "This field is required" })}
         />
+        {errors?.regularPrice && <Error>{errors.regularPrice.message}</Error>}
       </FormRow>
 
       <FormRow>
@@ -116,11 +120,12 @@ function CreateCabinForm({ setShowCabinForm }) {
           defaultValue={0}
           {...register("discount", {
             required: "This field is required",
-            validate: (value) =>
-              value <= getValues().regularPrice ||
+            validate: (discount) =>
+              Number(getValues().regularPrice) >= discount ||
               "Discount cannot be higher than regular price",
           })}
         />
+        {errors?.discount && <Error>{errors.discount.message}</Error>}
       </FormRow>
 
       <FormRow>
@@ -131,6 +136,7 @@ function CreateCabinForm({ setShowCabinForm }) {
           defaultValue=""
           {...register("description", { required: "This field is required" })}
         />
+        {errors?.description && <Error>{errors.description.message}</Error>}
       </FormRow>
 
       <FormRow>
