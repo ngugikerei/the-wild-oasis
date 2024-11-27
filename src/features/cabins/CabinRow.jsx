@@ -7,7 +7,8 @@ import Spinner from "../../ui/Spinner";
 import Row from "../../ui/Row";
 import toast from "react-hot-toast";
 import { useState } from "react";
-import CreateCabinForm from "./CreateCabinForm";
+import CreateEditCabinForm from "./CreateCabinForm";
+import { useDeleteCabin } from "./useDeleteCabin";
 
 const TableRow = styled.div`
   display: grid;
@@ -51,18 +52,7 @@ const Discount = styled.div`
 export default function CabinRow({ cabin }) {
   const [showEditForm, setShowEditForm] = useState(false);
 
-  const queryClient = useQueryClient();
-
-  const { isLoading: isDeleting, mutate } = useMutation({
-    mutationFn: (id) => deleteCabin(id),
-    onSuccess: () => {
-      toast.success("Cabin Successfully Deleted");
-      queryClient.invalidateQueries({
-        queryKey: ["cabins"],
-      });
-    },
-    onError: (err) => toast.error(err.message),
-  });
+  const { isDeleting, mutate } = useDeleteCabin();
 
   const {
     id: cabinId,
@@ -83,7 +73,11 @@ export default function CabinRow({ cabin }) {
         <Cabin>{name}</Cabin>
         <div>Fits up to {maxCapacity} guests</div>
         <Price>{formatCurrency(regularPrice)}</Price>
-        <Discount>{formatCurrency(discount)}</Discount>
+        {discount ? (
+          <Discount>{formatCurrency(discount)}</Discount>
+        ) : (
+          <span>&mdash;</span>
+        )}
 
         <Row type="horizontal">
           <Button size="small" onClick={() => setShowEditForm((show) => !show)}>
@@ -99,7 +93,7 @@ export default function CabinRow({ cabin }) {
           </Button>
         </Row>
       </TableRow>
-      {showEditForm && <CreateCabinForm cabinToEdit={cabin} />}
+      {showEditForm && <CreateEditCabinForm cabinToEdit={cabin} />}
     </>
   );
 }
