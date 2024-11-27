@@ -5,12 +5,11 @@ import Form from "../../ui/Form";
 import Button from "../../ui/Button";
 import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
-import { get, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createCabin } from "../../services/apiCabins";
 import toast from "react-hot-toast";
-import { useCreateCabin } from "./useCreateCabin";
 
 const FormRow = styled.div`
   display: grid;
@@ -51,10 +50,22 @@ const Error = styled.span`
 function CreateCabinForm({ setShowCabinForm }) {
   const { register, handleSubmit, getValues, formState } = useForm();
 
-  const { isCreating, createCabin } = useCreateCabin();
+  const queryClient = useQueryClient();
+
+  const { isLoading: isCreating, mutate } = useMutation({
+    mutationFn: createCabin,
+    onSuccess: () => {
+      toast.success("Cabin Successfully Added");
+      queryClient.invalidateQueries({
+        queryKey: ["cabins"],
+      });
+      //setShowCabinForm((show) => !show);
+    },
+    onError: (error) => toast.error(error.message),
+  });
 
   async function onSubmit(data) {
-    createCabin({ ...data, image: data.image[0] });
+    mutate({ ...data, image: data.image[0] });
     setShowCabinForm((show) => !show);
   }
   const { errors } = formState;
@@ -121,7 +132,6 @@ function CreateCabinForm({ setShowCabinForm }) {
         <Textarea
           type="number"
           id="description"
-          disabled={isCreating}
           defaultValue=""
           {...register("description", { required: "This field is required" })}
         />

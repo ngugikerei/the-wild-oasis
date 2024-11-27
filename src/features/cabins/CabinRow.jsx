@@ -1,14 +1,14 @@
 import styled from "styled-components";
+import { useState } from "react";
+import { useDeleteCabin } from "./useDeleteCabin";
+
+import CreateEditCabinForm from "./CreateCabinForm";
 import { formatCurrency } from "../../utils/helpers";
+
 import Button from "../../ui/Button";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteCabin } from "../../services/apiCabins";
 import Spinner from "../../ui/Spinner";
 import Row from "../../ui/Row";
-import toast from "react-hot-toast";
-import { useState } from "react";
-import CreateEditCabinForm from "./CreateCabinForm";
-import { useDeleteCabin } from "./useDeleteCabin";
+import { useCreateCabin } from "./useCreateCabin";
 
 const TableRow = styled.div`
   display: grid;
@@ -53,6 +53,7 @@ export default function CabinRow({ cabin }) {
   const [showEditForm, setShowEditForm] = useState(false);
 
   const { isDeleting, mutate } = useDeleteCabin();
+  const { isCreating, createCabin } = useCreateCabin();
 
   const {
     id: cabinId,
@@ -61,13 +62,24 @@ export default function CabinRow({ cabin }) {
     maxCapacity,
     regularPrice,
     discount,
+    description,
   } = cabin;
+
+  function handleDuplicate() {
+    createCabin({
+      name: `Copy of ${name}`,
+      maxCapacity,
+      regularPrice,
+      discount,
+      image,
+      description,
+    });
+  }
 
   if (isDeleting) return <Spinner />;
 
   return (
     <>
-      {" "}
       <TableRow role="row">
         <Img src={image} />
         <Cabin>{name}</Cabin>
@@ -80,6 +92,9 @@ export default function CabinRow({ cabin }) {
         )}
 
         <Row type="horizontal">
+          <Button size="small" onClick={handleDuplicate} disabled={isCreating}>
+            Duplicate
+          </Button>
           <Button size="small" onClick={() => setShowEditForm((show) => !show)}>
             Edit
           </Button>
