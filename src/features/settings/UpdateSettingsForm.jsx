@@ -7,7 +7,7 @@ import Spinner from "../../ui/Spinner";
 
 import Button from "../../ui/Button";
 import { useUpdateSettings } from "./useUpdateSettings";
-import { useForm } from "react-hook-form";
+
 
 function UpdateSettingsForm() {
   const {
@@ -20,13 +20,16 @@ function UpdateSettingsForm() {
     } = {},
   } = useSettings();
 
-  const { isUpdating, updateSettings } = useUpdateSettings();
-
-  async function onSubmit(data) {
-    updateSettings(data);
-  }
+  const { isUpdating, editSetting } = useUpdateSettings();
 
   if (isLoading) return <Spinner />;
+
+  function handleUpdateSettings(e, field) {
+    const { value } = e.target;
+
+    if (!value) return;
+    editSetting({ [field]: value });
+  }
 
   return (
     <Form>
@@ -36,6 +39,7 @@ function UpdateSettingsForm() {
           id="min-nights"
           disabled={isUpdating}
           defaultValue={minBookingLength}
+          onBlur={(e) => handleUpdateSettings(e, "minBookingLength")}
         />
       </FormRow>
       <FormRow label="Maximum nights/booking">
@@ -44,6 +48,7 @@ function UpdateSettingsForm() {
           id="max-nights"
           disabled={isUpdating}
           defaultValue={maxBookingLength}
+          onBlur={(e) => handleUpdateSettings(e, "maxBookingLength")}
         />
       </FormRow>
       <FormRow label="Maximum guests/booking">
@@ -52,6 +57,7 @@ function UpdateSettingsForm() {
           id="max-guests"
           disabled={isUpdating}
           defaultValue={maxGuestsPerBooking}
+          onBlur={(e) => handleUpdateSettings(e, "maxGuestsPerBooking")}
         />
       </FormRow>
       <FormRow label="Breakfast price">
@@ -60,10 +66,9 @@ function UpdateSettingsForm() {
           id="breakfast-price"
           disabled={isUpdating}
           defaultValue={breakfastPrice}
+          onBlur={(e) => handleUpdateSettings(e, "breakfastPrice")}
         />
       </FormRow>
-
-      <Button size="medium">Update settings</Button>
     </Form>
   );
 }
