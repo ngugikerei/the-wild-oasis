@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useState } from "react";
+
 import { useDeleteCabin } from "./useDeleteCabin";
 
 import CreateEditCabinForm from "./CreateCabinForm";
@@ -9,6 +9,8 @@ import Button from "../../ui/Button";
 import Spinner from "../../ui/Spinner";
 import Row from "../../ui/Row";
 import { useCreateCabin } from "./useCreateCabin";
+import Modal from "../../ui/Modal";
+import ConfirmDelete from "../../ui/ConfirmDelete";
 
 const TableRow = styled.div`
   display: grid;
@@ -50,9 +52,7 @@ const Discount = styled.div`
 `;
 
 export default function CabinRow({ cabin }) {
-  const [showEditForm, setShowEditForm] = useState(false);
-
-  const { isDeleting, mutate } = useDeleteCabin();
+  const { isDeleting, deleteCabin } = useDeleteCabin();
   const { isCreating, createCabin } = useCreateCabin();
 
   const {
@@ -95,20 +95,33 @@ export default function CabinRow({ cabin }) {
           <Button size="small" onClick={handleDuplicate} disabled={isCreating}>
             Duplicate
           </Button>
-          <Button size="small" onClick={() => setShowEditForm((show) => !show)}>
-            Edit
-          </Button>
 
-          <Button
-            size="small"
-            onClick={() => mutate(cabinId)}
-            disabled={isDeleting}
-          >
-            Delete
-          </Button>
+          <Modal>
+            <Modal.Open name="edit">
+              <Button size="small">Edit</Button>
+            </Modal.Open>
+
+            <Modal.Window opens="edit">
+              <CreateEditCabinForm cabinToEdit={cabin} />
+            </Modal.Window>
+          </Modal>
+
+          <Modal>
+            <Modal.Open>
+              <Button name="delete" size="small" disabled={isDeleting}>
+                Delete
+              </Button>
+            </Modal.Open>
+            <Modal.Window opens="delete">
+              <ConfirmDelete
+                cabin={cabin}
+                disabled={isDeleting}
+                onConfirm={() => deleteCabin(cabinId)}
+              />
+            </Modal.Window>
+          </Modal>
         </Row>
       </TableRow>
-      {showEditForm && <CreateEditCabinForm cabinToEdit={cabin} />}
     </>
   );
 }
