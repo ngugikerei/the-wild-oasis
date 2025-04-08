@@ -2,7 +2,6 @@ import {
   cloneElement,
   createContext,
   useContext,
-  useEffect,
   useRef,
   useState,
 } from "react";
@@ -69,7 +68,7 @@ const ModalContext = createContext();
 export default function Modal({ children }) {
   const [openName, setOpenName] = useState("");
   const close = () => setOpenName("");
-  const open = (windowName) => setOpenName(windowName);
+  const open = setOpenName;
 
   return (
     <ModalContext.Provider value={{ openName, close, open }}>
